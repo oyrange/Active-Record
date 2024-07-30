@@ -17,11 +17,64 @@ class Customer < ActiveRecord::Base
   #  You should NOT need to call Ruby library functions for sorting, filtering, etc.
 
   def self.any_candice
-    # YOUR CODE HERE to return all customer(s) whose first name is Candice
-    # probably something like:  Customer.where(....)
+    Customer.where(first: 'Candice')
   end
   def self.with_valid_email
+    Customer.where("email LIKE ?", "%@%")
     # YOUR CODE HERE to return only customers with valid email addresses (containing '@')
   end
-  # etc. - see README.md for more details
+
+  def self.with_dot_org_email
+    Customer.where("email LIKE ?", "%.org%")
+  end
+
+  def self.with_invalid_email
+    Customer.where.not("email LIKE ?", "%@%")
+  end
+
+  def self.with_blank_email
+    Customer.where("email IS NULL")
+  end
+
+  def self.born_before_1980
+    Customer.where("birthdate < '1980-01-01'")
+  end
+
+  def self.with_valid_email_and_born_before_1980
+    Customer.where("email LIKE ?", "%@%").where("birthdate < '1980-01-01'")
+  end
+
+  def self.last_names_starting_with_b
+    Customer.where("last LIKE :letter", letter: "B%") \
+            .order(:birthdate)
+  end
+
+  def self.twenty_youngest
+    Customer.order(birthdate: :desc).limit(20)
+  end
+
+  def self.update_gussie_murray_birthdate
+    gussie = Customer.where(first: "Gussie", last: "Murray").first
+    gussie.birthdate = Time.parse('February 8,2004')
+    gussie.save
+  end
+
+  def self.change_all_invalid_emails_to_blank
+    self.with_invalid_email.each do |customer|
+      customer.update(email: nil)
+    end
+  end
+
+  def self.delete_meggie_herman
+    meggie = Customer.where(first: 'Meggie', last: 'Herman').first
+    meggie.destroy
+  end
+
+  def self.delete_everyone_born_before_1978
+    destroyable_custies = Customer.where("birthdate <= '1977-12-31'")
+    destroyable_custies.each do |customer|
+      customer.destroy
+    end
+  end
+
 end
